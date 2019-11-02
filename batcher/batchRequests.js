@@ -1,13 +1,11 @@
 // Internal Libraries
 const Batch = require('./batch');
 const Scraper = require('../utils/scraper');
-const addToDb = require('../utils/urlOperations');
+const addToDb = require('../utils/urlDbOperations');
 
 // Configuration
 const config = require('../config/config');
 const request_batch = new Batch();
-
-let count = 0;
 
 const startCrawler = async () => {
     try {
