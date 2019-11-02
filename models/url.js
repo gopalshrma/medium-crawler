@@ -26,7 +26,7 @@ const url_schema = new mongoose.Schema(
     },
     {
         timestamps: true,
-        strictL: true
+        strict: true
     }
 );
 

@@ -1,12 +1,23 @@
 const url_model = require('../models/url');
+const config = require('../config/config');
 
 const addUrlsToDatabase = async (data) => {
     try {
-        let url = await url_model.create(data); 
-        return url;
+        let insert_bool = true;
+        if(config.MAX_URLS !== -1) {
+            let count = await url_model.countDocuments({});
+            insert_bool = count < config.MAX_URLS;
+        }
+        if(insert_bool) {
+            let url = await url_model.create(data);
+            return url;
+        } else {
+            console.log(config.MAX_URLS, 'reached. Exiting.')
+            process.exit();
+        }
     } catch (error) {
         if(error && error.code === 11000)
-            console.log('Duplicate key found. Increasing count.');
+            console.log('Duplicate key found.');
         else
             throw error;
     }
