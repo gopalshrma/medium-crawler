@@ -23,7 +23,7 @@ const getHyperlinksFromBody = (body, base_url) => {
     selector(links).each((i, each) => {
         let href = selector(each).attr('href');
         let {url, params} = parseUrlParams(href ? href : '');
-        if(url.startsWith('//')) {
+        if(url.startsWith('//') || url.endsWith('/me') || url.includes('/me/')) {
             return [];
         }
         url = url.startsWith('/') ? `https://${base_url}${url}` : url;
@@ -46,7 +46,7 @@ const requestUrlAndGetHyperlinks = async (link, base_url) => {
         const response = await axios.get(link);
         return getHyperlinksFromBody(response.data, base_url);
     } catch (error) {
-        if(error && error.response && error.response.status && error.response.status === 404) {
+        if(error && error.response && error.response.status) {
             console.log(error.response.status, link);
             return [];
         }

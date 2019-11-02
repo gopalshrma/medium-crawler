@@ -12,7 +12,7 @@ const addUrlsToDatabase = async (data) => {
             let url = await url_model.create(data);
             return url;
         } else {
-            console.log(config.MAX_URLS, 'reached. Exiting.')
+            console.log(config.MAX_URLS + ' urls reached. Exiting.')
             process.exit();
         }
     } catch (error) {
