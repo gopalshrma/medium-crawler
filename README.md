@@ -30,4 +30,5 @@ Recursively crawls popular blogging website `https://medium.com` and harvests al
 - The program can be run with `npm start`.
 - If the MAX_URLS environment variable is set to -1 then the crawler will run infinitely 
 (or until your heap space runs out atleast) and will need to be stopped manually.
-- If MAX_CONCURRENT_REQUESTS is too high then you'll get blocked by the IP banner and start receiving 429 responses. I'd advise keeping this to 5 or lower.
+- If MAX_CONCURRENT_REQUESTS is too high then you'll get blocked by the IP banner and start receiving 429 responses. I'd advise keeping this to 10 or lower.
+- The MAX_URLS variable might be exceeded slightly due to the bundled nature of the DB inserts. (DB inserts are batched and multiple are processed at the same time). If you have a hard limit on the number of URLs you can store in the DB, you might want to lower the number a little in the MAX_URLS field. 

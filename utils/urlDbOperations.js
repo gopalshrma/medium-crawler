@@ -3,12 +3,12 @@ const config = require('../config/config');
 
 const addUrlsToDatabase = async (data) => {
     try {
-        let insert_bool = true;
+        let insert_bool = true, count = 0;
         // If we do not need to infinite crawl then check for current count of documents.
         // We can use the estimatedDocumentCount function here if necessary since it allows for
         // a constant time fetch of the count, but countDocuments is a lot more accurate.
-        if(config.MAX_URLS !== -1) {
-            let count = await url_model.countDocuments({});
+        if(config.MAX_URLS != -1) {
+            count = await url_model.countDocuments({});
             insert_bool = count < config.MAX_URLS;
         }
 
@@ -18,7 +18,8 @@ const addUrlsToDatabase = async (data) => {
             let url = await url_model.create(data);
             return url;
         } else {
-            console.log(config.MAX_URLS + ' urls reached. Exiting.')
+            console.log(`\n${count} urls reached.\n`);
+            console.log('=============== Exiting Program ===============');
             process.exit();
         }
     } catch (error) {

@@ -11,7 +11,7 @@ mongoose = mongoose.createConnection(DB_CONNECTION,
         useCreateIndex: true
     }, (err) => {
         if(!err)
-            console.log('=============== Database Connected ===============');    
+            console.log('=============== Database Connected ===============\n');    
         else
             console.log(err);
     }

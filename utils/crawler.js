@@ -66,7 +66,7 @@ const getHyperlinksFromBody = (body, base_url) => {
 const requestUrlAndGetHyperlinks = async (link, base_url) => {
     try {
         // Fetch the URL response and get all hyperlinks within it, then return.
-        console.log('Crawling page ', link);
+        console.log('Crawling page -', link);
         const response = await axios.get(link);
         return getHyperlinksFromBody(response.data, base_url);
     } catch (error) {
