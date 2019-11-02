@@ -2,14 +2,10 @@
 const path = require('path');
 const dotenv = require('dotenv').config;
 
+// Internal Libraries
+const requestBatcher = require('./batcher/requestBatcher');
+
 // Configuration
-const requestBatcher = require('./batcher/batchRequests');
 dotenv({path: path.join(__dirname, 'environment.env')});
 
-(async () => {
-    try {
-        requestBatcher.startCrawler();
-    } catch (error) {
-        console.log(error);
-    }
-})();
+requestBatcher.startCrawler();
