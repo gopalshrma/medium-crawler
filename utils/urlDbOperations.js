@@ -5,7 +5,10 @@ const addUrlsToDatabase = async (data) => {
         let url = await url_model.create(data); 
         return url;
     } catch (error) {
-        throw error;
+        if(error && error.code === 11000)
+            console.log('Duplicate key found. Increasing count.');
+        else
+            throw error;
     }
 }
 
@@ -28,15 +31,19 @@ const increaseUrlCountAndMergeParams = async (data) => {
 const filterUrlsAndSaveToDb = async (urls) => {
     try {
         let to_be_added = [], to_be_incremented = [];
-        for(let url of urls) {
-            let item = await url_model.findOne({url: url.url});
-            if(item)
-                to_be_incremented.push(url);
-            else
-                to_be_added.push(url);
+        if(urls && Array.isArray(urls)) {
+            for(let url of urls) {
+                let item = await url_model.findOne({url: url.url});
+                if(item)
+                    to_be_incremented.push(url);
+                else
+                    to_be_added.push(url);
+            }
+        } else {
+            console.log(urls);
         }
-        addUrlsToDatabase(to_be_added);
-        increaseUrlCountAndMergeParams(to_be_incremented);
+        await addUrlsToDatabase(to_be_added);
+        await increaseUrlCountAndMergeParams(to_be_incremented);
     } catch (error) {
         throw error;
     }
@@ -44,7 +51,8 @@ const filterUrlsAndSaveToDb = async (urls) => {
 
 const getUrlStatus = async (url) => {
     try {
-        return await url_model.findOne({url: url}).lean().select({scraped: 1});
+        let item = await url_model.findOne({url: url}).lean().select({scraped: 1});
+        return item;
     } catch (error) {
         throw error;
     }

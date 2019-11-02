@@ -1,7 +1,7 @@
 // Internal Libraries
 const Batch = require('./batch');
-const Scraper = require('../utils/scraper');
-const addToDb = require('../utils/urlDbOperations');
+const Scraper = require('../utils/crawler');
+const urlDbOperations = require('../utils/urlDbOperations');
 
 // Configuration
 const config = require('../config/config');
@@ -9,44 +9,55 @@ const request_batch = new Batch();
 
 const startCrawler = async () => {
     try {
-        await addToDb.clearDatabaseForReRun();
-        await addToDb.addUrlsToDatabase({
+        await urlDbOperations.clearDatabaseForReRun();
+        await urlDbOperations.addUrlsToDatabase({
             url: config.STARTING_URL,
             params: []
         });
         await crawlLink(config.STARTING_URL);
         for(let index = 0; index < config.MAX_CONCURRENT_REQUESTS; index++) {
-            let item = getNextLink();
+            let item = await getNextLink();
+            if(!item) {
+                throw new Error(`Initial page does not have ${config.MAX_CONCURRENT_REQUESTS} links. Please tone down MAX_CONCURRENT_REQUESTS if this becomes an issue going forth.`);
+            }
             crawlLink(item, true);
         }
     } catch (error) {
-        throw error;
+        console.log(error);
+        process.exit();
     }
 }
 
 const crawlLink = async (link, recurse=false) => {
     try {
         let items = await Scraper(link, config.BASE_URL);
-        await addToDb.filterUrlsAndSaveToDb(items);
-        await addToDb.setUrlToScraped(link);
-        request_batch.addArrayToBatch(items.map(elem => elem.url));
+        if(items && Array.isArray(items)) {
+            await urlDbOperations.filterUrlsAndSaveToDb(items);
+            request_batch.addArrayToBatch(items.map(elem => elem.url));
+            await urlDbOperations.setUrlToScraped(link);
+        }
         if(recurse) {
-            crawlLink(getNextLink(), true);
+            let nextLink = await getNextLink();
+            return nextLink ? crawlLink(nextLink, true) : null;
         } else {
             return;
         }
     } catch (error) {
-        throw error;
+        console.log(error);
     }
 }
 
-const getNextLink = () => {
-    let link = request_batch.getNextItem();
-    let status = addToDb.getUrlStatus(link);
-    if(status) {
-        return link;
-    } else {
-        return getNextLink();
+const getNextLink = async () => {
+    try {
+        let link = request_batch.getNextItem();
+        let url = await urlDbOperations.getUrlStatus(link);
+        if(url && !url.scraped) {
+            return link;
+        } else {
+            return getNextLink();
+        }
+    } catch (error) {
+        throw error;
     }
 }
 

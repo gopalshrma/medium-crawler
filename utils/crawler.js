@@ -23,8 +23,12 @@ const getHyperlinksFromBody = (body, base_url) => {
     selector(links).each((i, each) => {
         let href = selector(each).attr('href');
         let {url, params} = parseUrlParams(href ? href : '');
+        if(url.startsWith('//')) {
+            return [];
+        }
         url = url.startsWith('/') ? `https://${base_url}${url}` : url;
-        if(!url.includes(base_url)) {
+        let has_right_protocol = url.startsWith('https://') || url.startsWith('http://');
+        if(!url.includes(base_url) || !has_right_protocol) {
             return [];
         }
         let index = hyperlinks.findIndex(elem => elem.url === url);
@@ -38,14 +42,15 @@ const getHyperlinksFromBody = (body, base_url) => {
 
 const requestUrlAndGetHyperlinks = async (link, base_url) => {
     try {
-        console.log('Scraping page ', link);
+        console.log('Crawling page ', link);
         const response = await axios.get(link);
         return getHyperlinksFromBody(response.data, base_url);
     } catch (error) {
         if(error && error.response && error.response.status && error.response.status === 404) {
-            console.log('Page not found! ', link);
+            console.log(error.response.status, link);
             return [];
-        }else {
+        }
+        else {
             throw error;
         }
     }
